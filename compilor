@@ -1,0 +1,945 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>    
+    <meta charset="UTF-8">    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">    
+    <title>Teach Tech Toe Advanced AI Compiler</title>            
+    
+    <!-- Compiler Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>    
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           TEACH TECH TOE DESIGN SYSTEM & THEME
+           ========================================================================== */
+        
+        :root {            
+            --ink: #14171f;
+            --paper: #f6f3ec;            
+            --panel-bg: #ffffff;            
+            --accent-color: #ff9800;
+            --ember: #ff6b1a;
+            --term-green: #4fd68a;
+            --text-color: #52504a;            
+            --text-bright: #1a1a1a;            
+            --border-color: #e7e2d6;            
+            --button-success: #ff6b1a;            
+            --button-run-text: #fff;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', Consolas, monospace;
+        }        
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }                
+        a { text-decoration: none !important; }
+
+        body {            
+            font-family: var(--font-body) !important;            
+            background: var(--paper) !important;            
+            min-height: 100vh;            
+            display: flex;            
+            flex-direction: column;        
+        }
+
+        /* --- Header & Navigation --- */
+        #header {
+            background-color: #000000;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            height: auto;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+        }
+        
+        #header .container { width: 100%; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        #header .sitename { color: #ffffff; font-size: clamp(1rem, 5vw, 1.25rem); margin: 0; font-weight: 700; white-space: nowrap; }
+        #header .navmenu { display: flex; align-items: center; flex: 1; min-width: 0; }
+        #header .navmenu ul {
+            display: flex; list-style: none; margin: 0; padding: 0;
+            gap: clamp(10px, 3vw, 20px); align-items: center; flex-wrap: wrap; justify-content: flex-end; flex: 1;
+        }
+        #header .navmenu ul li { position: relative; }
+        #header .navmenu ul li a { 
+            color: #ffffff; font-weight: 500; font-size: clamp(12px, 3vw, 13.5px);
+            transition: 0.3s; padding: 6px 4px; display: inline-block;
+        }
+        #header .navmenu ul li a i { color: #ffffff; }
+        #header .navmenu ul li a:hover, #header .navmenu ul li a.active { color: var(--accent-color); }
+        
+        #header .navmenu ul .dropdown ul { 
+            display: none; position: absolute; top: 100%; left: 0;
+            background-color: #111111; border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            flex-direction: column; min-width: 200px; padding: 8px 0; gap: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1); z-index: 10000;
+        }
+        #header .navmenu ul .dropdown:hover > ul { display: flex; }
+        #header .navmenu ul ul a { color: #ffffff; padding: 8px 20px; display: block; font-size: 13px; }
+        #header .navmenu ul ul a:hover { background: #222222; color: var(--accent-color); }
+
+        .mobile-nav-toggle { color: #ffffff; font-size: 24px; cursor: pointer; display: none; background: none; border: none; padding: 10px; margin-left: auto; }
+        .mobile-nav-menu {
+            display: none; position: absolute; top: 55px; left: 0; width: 100%;
+            background: #000000; flex-direction: column; padding: 20px; gap: 10px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.3); z-index: 9998;
+        }
+        .mobile-nav-menu.active { display: flex; }
+        .mobile-nav-menu a { color: #ffffff; padding: 12px; border-radius: 8px; transition: 0.3s; font-size: 14px; }
+        .mobile-nav-menu a:hover { background: #1a1a1a; color: var(--accent-color); }
+
+        .get-started-tab {
+            background: var(--ember); color: #fff !important; padding: 10px 20px !important;
+            border-radius: 15px; font-weight: 700; transition: all 0.3s ease; font-size: clamp(12px, 3vw, 14px);
+        }
+        .get-started-tab:hover, .get-started-tab.active { background: #110f0e; color: #fff !important; transform: translateY(-2px); }
+
+        @media (max-width: 1199px) {
+            #header .navmenu ul:not(.mobile-nav-menu) { display: none !important; }
+            .mobile-nav-toggle { display: block; }
+            #header .container { display: flex; align-items: center; justify-content: space-between; }
+        }
+
+        /* --- Hero: Terminal Window Signature --- */
+        .hero-section { padding: clamp(40px, 8vw, 80px) 20px 50px; background: var(--paper); }
+        .hero-eyebrow {
+            font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 1.5px;
+            color: var(--ember); margin-bottom: 18px;
+        }
+        .hero-title {
+            font-family: var(--font-display); font-weight: 700; font-size: clamp(2.2rem, 5vw, 3.2rem);
+            line-height: 1.08; color: var(--ink); letter-spacing: -0.01em;
+        }
+        .hero-title span { color: var(--accent-color); }
+        .hero-sub { color: var(--text-color); line-height: 1.7; margin-top: 20px; font-size: clamp(0.95rem, 2vw, 1.05rem); max-width: 480px; }
+        .hero-sub code { background: #ece7d9; color: var(--ink); padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.9em; }
+        .hero-flags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+        .hero-flag {
+            font-family: var(--font-mono); font-size: 12.5px; color: var(--ink); background: #ece7d9;
+            padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border-color);
+        }
+        .term-window {
+            background: var(--ink); border-radius: 14px; overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(20,23,31,0.4); max-width: 480px; margin: 0 auto;
+        }
+        .term-titlebar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #1c202b; }
+        .term-dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+        .term-titletext { margin-left: 8px; color: #6b7280; font-family: var(--font-mono); font-size: 12px; }
+        .term-body {
+            font-family: var(--font-mono); font-size: 13.5px; color: #d1d5db; padding: 22px 20px;
+            min-height: 220px; line-height: 1.9; white-space: pre-wrap;
+        }
+        .term-body .term-prompt { color: var(--term-green); }
+        .term-body .term-comment { color: #6b7280; }
+        .term-cursor { display: inline-block; width: 7px; height: 15px; background: var(--term-green); vertical-align: middle; animation: term-blink 1s step-end infinite; }
+        @keyframes term-blink { 50% { opacity: 0; } }
+        @media (prefers-reduced-motion: reduce) { .term-cursor { animation: none; } }
+
+        /* --- Compiler Section & Toolbar --- */
+        .status { font-size: 0.82rem; color: #fff !important; font-weight: 500; font-family: var(--font-mono); }                
+        
+        .compiler-section {            
+            padding: 30px 20px;            
+            background: var(--paper) !important;            
+            flex: 1;        
+        }        
+        .compiler-container { max-width: 1440px; margin: 0 auto; }     
+        
+        /* --- Studio Compiler Unified Wrapper --- */
+        .compiler-wrapper {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.08);
+            overflow: hidden; /* Clips all children to perfect rounded corners */
+            display: flex;
+            flex-direction: column;
+        }
+           
+        .compiler-header-inline {            
+            background: var(--ink); color: #fff; padding: 14px 20px;            
+            display: flex; align-items: center;        
+        }        
+        .titlebar-dots { display: flex; gap: 6px; margin-right: 14px; }
+        .titlebar-dots span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.25); display: inline-block; }
+        .compiler-header-name { font-family: var(--font-mono); font-weight: 500; color: #cbd5e1; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; flex: 1; }
+        .compiler-header-name i { color: var(--accent-color); }
+        .ai-chip { background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; font-size: 10.5px; padding: 3px 9px; border-radius: 20px; font-weight: 600; letter-spacing: 0.3px; }
+
+.nav-tabs {              
+    display: flex; 
+    flex-wrap: wrap !important; /* Allows tabs to drop to the next line */
+    background: #fff !important;              
+    gap: 6px !important; padding: 12px 15px 0 !important; border: none !important; 
+}
+        
+        .nav-tabs::-webkit-scrollbar {
+            display: none; /* Hides scrollbar for Chrome/Safari */
+        }
+                
+        .tab-btn {              
+            background: #f7f4ed !important; color: #52504a !important; border: 1px solid var(--border-color) !important;              
+            border-bottom: none; padding: 9px 15px; cursor: pointer; border-radius: 10px 10px 0 0 !important;              
+            font-size: 0.82rem; font-weight: 600 !important; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+            display: inline-flex; align-items: center; gap: 6px;
+        }                
+        .tab-btn.active {              
+            background: #fff !important; color: var(--ink) !important; border-top: 3px solid var(--accent-color) !important;              
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.02);        
+        }        
+        .main-container {              
+            display: flex; height: 650px; padding: 20px !important;              
+            gap: 20px !important; background: #fff; 
+        }                
+        .editor-container { width: 50%; display: flex; flex-direction: column; background: #fff !important; border-radius: 14px !important; }        
+        textarea { width: 100%; flex: 1; background: #fafafa !important; color: #222 !important; font-family: Consolas, monospace !important; font-size: 0.95rem; padding: 15px; border: 1px solid #ddd !important; border-radius: 14px !important; resize: none; outline: none; line-height: 1.5; }                
+        
+        .control-panel { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; }        
+        button.run-btn { background: var(--ember) !important; color: #fff !important; border: none; padding: 12px 25px !important; font-weight: bold; border-radius: 50px !important; cursor: pointer; font-size: 0.9rem; box-shadow: 0 5px 15px rgba(255,107,26,.3) !important; transition: transform 0.2s; display: inline-flex; align-items: center; gap: 7px; }        
+        button.run-btn:hover { transform: translateY(-2px); }                
+        
+        .tool-btn { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 10px 18px; font-weight: 600; border-radius: 50px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .tool-btn:hover { background: #e2e8f0; transform: translateY(-2px); }
+        .ai-btn { background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; border: none; }
+        .ai-btn:hover { background: linear-gradient(135deg, #4f46e5, #9333ea); color: #fff; }
+
+        .output-container { width: 50%; display: flex; flex-direction: column; background: #fff !important; border-radius: 14px !important; overflow-y: auto; }        
+        .output-header { font-size: 13px !important; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink) !important; margin-bottom: 10px; font-family: var(--font-mono); }                
+        .output-box { flex: 1; width: 100%; border: 1px solid #e5e7eb; border-radius: 14px !important; background: #fff !important; min-height: 200px; }        
+        #output-iframe { background: #fff; display: block; border: none; }        
+        #console-output { background: #16161e !important; color: #9ece6a !important; font-family: Consolas, monospace !important; padding: 15px; overflow-y: auto; white-space: pre-wrap; display: none; font-size: 0.9rem; }                
+        #plot-container { display: none; justify-content: center; align-items: center; background: #f8fbff !important; padding: 10px; margin-top: 10px; border: 1px solid #e5e7eb; border-radius: 14px !important; }        
+        table { border-collapse: collapse; width: 100%; margin-top: 5px; font-family: sans-serif; background: #fff; color: #000; }        
+        th, td { border: 1px solid #dddddd; text-align: left; padding: 8px; }        
+        th { background-color: #f2f2f2; font-weight: bold; }
+
+        /* --- Footer Section --- */
+        .footer-section { background:#0b1220; color:#ffffff; padding: clamp(40px, 8vw, 70px) 15px 20px; margin-top: auto; }
+        .footer-grid { display:grid; grid-template-columns: 1fr; gap: clamp(20px, 5vw, 40px); }
+        @media (min-width: 576px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 992px) { .footer-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); } }
+        .footer-box h3, .footer-box h4 { margin-bottom:15px; color:var(--accent-color); font-weight:700; font-size: clamp(14px, 4vw, 16px); }
+        .footer-box p { color:#cbd5e1; line-height:1.8; font-size: clamp(12px, 3vw, 14px); }
+        .footer-box ul { list-style:none; padding:0; margin:0; }
+        .footer-box ul li { margin-bottom:10px; }
+        .footer-box ul li a { color:#cbd5e1; transition:0.3s; font-size: clamp(12px, 3vw, 14px); }
+        .footer-box ul li a:hover { color:var(--accent-color); padding-left:5px; }
+        .social-links { display:flex; gap:10px; margin-top:15px; flex-wrap: wrap; }
+        .social-links a { width: clamp(38px, 10vw, 42px); height: clamp(38px, 10vw, 42px); background:#1e293b; display:flex; align-items:center; justify-content:center; border-radius:50%; color:white; transition:0.3s; font-size: 16px; }
+        .social-links a:hover { background:var(--accent-color); transform:translateY(-5px); }
+        .footer-bottom { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-top:25px; flex-direction: column; text-align: center; }
+        @media (min-width: 576px) { .footer-bottom { flex-direction: row; text-align: left; } }
+        .footer-bottom p { margin:0; color:#94a3b8; font-size: clamp(12px, 3vw, 14px); }
+        .footer-links { display:flex; gap: clamp(10px, 3vw, 20px); flex-wrap: wrap; justify-content: center; }
+        @media (min-width: 576px) { .footer-links { justify-content: flex-start; } }
+        .footer-links a { color:#94a3b8; font-size: clamp(12px, 3vw, 14px); }
+        .footer-links a:hover { color:var(--accent-color); }
+        .footer-section hr { border-color:rgba(255,255,255,0.1); margin-top:25px; }
+
+        @media (max-width: 991px) {
+            .term-window { margin-top: 10px; }
+        }
+
+        @media (max-width: 768px) {            
+            .compiler-section { padding: 15px 10px; }            
+            .compiler-header-inline { flex-direction: column; gap: 10px; text-align: center; padding: 12px 15px; }            
+            .nav-tabs { padding: 10px 8px 0 8px !important; gap: 5px !important; }            
+            .tab-btn { padding: 8px 10px !important; font-size: 0.75rem !important; border-radius: 8px 8px 0 0 !important; }            
+            .main-container { flex-direction: column; height: auto; gap: 15px !important; padding: 15px !important; }            
+            .editor-container, .output-container { width: 100%; }            
+            textarea { font-size: 0.85rem; padding: 12px; min-height: 250px; }        
+        }    
+    </style>
+</head>
+<body>    
+
+    <!-- Top Contact Bar -->
+    <div class="container-fluid bg-black text-white border-bottom px-4 px-md-5 d-none d-lg-block py-2">
+      <small>📍 A-4 Chitra Estate, Indore | 📞 +91-8878695818 | ✉️ teachtechtoe@gmail.com</small>
+    </div>
+    
+    <!-- Navigation Header -->
+    <header id="header">
+      <div class="container">
+        <a href="index.html" class="logo"><h1 class="sitename">🎓 Teach-Tech-Toe</h1></a>
+        <button class="mobile-nav-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
+        <nav id="navmenu" class="navmenu">
+          <ul>
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li class="dropdown"><a href="#"><span>Courses AI</span> <i class="bi bi-chevron-down ms-1"></i></a>
+              <ul>
+                <li><a href="Courses.html">Our Courses</a></li>
+                <li><a href="counselling.html">Free Counselling</a></li>
+                <li><a href="careertest.html">Career Test</a></li>
+              </ul>
+            </li>
+            <li><a href="searchtrainers.html">Search Trainers</a></li>
+            <li class="dropdown"><a href="#"><span>Earn here!</span> <i class="bi bi-chevron-down ms-1"></i></a>
+              <ul>
+                <li><a href="trainers.html">For Trainers</a></li>
+                <li><a href="students.html">For Students</a></li>
+              </ul>
+            </li>
+            <li class="dropdown"><a href="#"><span>Free AI Tools</span> <i class="bi bi-chevron-down ms-1"></i></a>
+              <ul>
+               <li><a href="mocktest.html">Mock Tests</a></li>
+                <li><a href="index.html">Online Compiler</a></li>
+                <li><a href="stock market training/index.html">Stock Market Training</a></li>
+                <li><a href="resumebuilder.html">Resume Builder</a></li>
+                <li><a href="audio generator/aud.html">Text to Speech</a></li>
+                <li><a href="downloads.html">Download Study Tools</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <div id="mobileMenu" class="mobile-nav-menu">
+          <a href="index.html">Home</a>
+          <a href="index.html#about">About</a>
+          <a href="counselling.html">Free Counselling</a>
+          <a href="Courses.html">Our Courses</a>
+          <a href="searchtrainers.html">Search Trainers</a>
+          <a href="trainers.html">For Trainers</a>
+          <a href="students.html">For Students</a>
+          <a href="mocktest.html">Mock Tests</a>
+          <a href="index.html" class="active">Online Compiler</a>
+          <a href="resumebuilder.html">Resume Builder</a>
+          <a href="audio generator/aud.html">Text to Speech</a>
+          <a href="downloads.html" class="get-started-tab">Download Study Tools</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="main d-flex flex-column" style="flex: 1;">        
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-6">
+                        <div class="hero-eyebrow">15+ LANGUAGES · ZERO SETUP · AI REVIEW</div>
+                        <h1 class="hero-title">Write code.<br>Hit run.<br><span>See it happen.</span></h1>
+                        <p class="hero-sub">A browser-based studio for every stage of learning to code — from your first <code>print()</code> to Data Science, SQL, C++, Java, Rust, or Go. Zero installation, zero configuration.</p>
+                        <div class="hero-flags">
+                            <span class="hero-flag">--languages=15+</span>
+                            <span class="hero-flag">--ai-review=on</span>
+                            <span class="hero-flag">--cloud-engine=ready</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="term-window" aria-hidden="true">
+                            <div class="term-titlebar">
+                                <span class="term-dot" style="background:#ff5f56;"></span>
+                                <span class="term-dot" style="background:#ffbd2e;"></span>
+                                <span class="term-dot" style="background:#27c93f;"></span>
+                                <span class="term-titletext">teachtechtoecompiler.onrender.com</span>
+                            </div>
+                            <div class="term-body" id="hero-term-body"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>        
+
+        <!-- Studio Compiler Workspace Section -->
+        <section class="compiler-section">            
+            <div class="compiler-container">                
+                
+                <!-- COMPILER WRAPPER -->
+                <div class="compiler-wrapper">
+
+                    <div class="compiler-header-inline">
+                        <div class="titlebar-dots"><span></span><span></span><span></span></div>
+                        <div class="compiler-header-name"><i class="bi bi-terminal-fill"></i> Studio Terminal <span class="ai-chip">AI Assistant</span></div>
+                        <div id="status-text" class="status">Ready</div>                
+                    </div>     
+                               
+                    <div class="nav-tabs">                    
+                        <button class="tab-btn active" onclick="switchLanguage(event, 'html')"><i class="bi bi-filetype-html"></i> HTML/CSS/JS</button>                    
+                        <button class="tab-btn" onclick="switchLanguage(event, 'py-simple')"><i class="bi bi-filetype-py"></i> Python</button>                    
+                        <button class="tab-btn" onclick="switchLanguage(event, 'py-ds')"><i class="bi bi-bar-chart-line"></i> Data Science</button>                    
+                        <button class="tab-btn" onclick="switchLanguage(event, 'sql')"><i class="bi bi-filetype-sql"></i> SQL</button>                    
+                        <button class="tab-btn" onclick="switchLanguage(event, 'cpp')"><i class="bi bi-braces"></i> C++</button>
+                        <button class="tab-btn" onclick="switchLanguage(event, 'c')"><i class="bi bi-code-slash"></i> C</button>
+                        <button class="tab-btn" onclick="switchLanguage(event, 'java')"><i class="bi bi-filetype-java"></i> Java Core</button>                    
+                        <button class="tab-btn" onclick="switchLanguage(event, 'php')"><i class="bi bi-filetype-php"></i> PHP</button>
+                        <button class="tab-btn" onclick="switchLanguage(event, 'go')"><i class="bi bi-lightning-charge-fill"></i> Go</button>
+                        <button class="tab-btn" onclick="switchLanguage(event, 'rust')"><i class="bi bi-gear-fill"></i> Rust</button>
+                        <button class="tab-btn" onclick="switchLanguage(event, 'csharp')"><i class="bi bi-hash"></i> C# (.NET)</button>
+                        <button class="tab-btn" onclick="switchLanguage(event, 'js')"><i class="bi bi-filetype-js"></i> Node.js</button>
+                        <button class="tab-btn" onclick="switchLanguage(event, 'ts')"><i class="bi bi-filetype-tsx"></i> TypeScript</button>
+                        <button class="tab-btn" onclick="switchLanguage(event, 'ruby')"><i class="bi bi-gem"></i> Ruby</button>
+                        <button class="tab-btn" onclick="switchLanguage(event, 'r')"><i class="bi bi-bar-chart-fill"></i> R (RStudio)</button>
+                    </div>                
+                    
+                    <div class="main-container">                    
+                        <div class="editor-container">                        
+                            <textarea id="code-editor" spellcheck="false"></textarea>                        
+                            <div class="control-panel">                            
+                                <button class="run-btn" onclick="executeCode()"><i class="bi bi-play-fill"></i> Run Code</button>   
+                                <button class="tool-btn ai-btn" onclick="analyzeWithAI()">🤖 AI Code Review</button>
+                                <button class="tool-btn" onclick="popOutOutput()">↗️ New Tab</button>
+                                <button class="tool-btn" onclick="downloadCode()">💾 Download</button>
+                                <button class="tool-btn" onclick="shareCode()">🔗 Share</button>                     
+                            </div>                    
+                        </div>                    
+                        <div class="output-container">                        
+                            <div class="output-header" id="output-title">UI Result Canvas</div>                        
+                            <iframe id="output-iframe" class="output-box" sandbox="allow-scripts"></iframe>                        
+                            <pre id="console-output" class="output-box"></pre>                        
+                            <div class="output-header visual-header" id="plot-title" style="display:none; margin-top:15px;">Visual Graphics Output</div>                        
+                            <div id="plot-container"></div>                    
+                        </div>                
+                    </div>            
+
+                </div>
+
+            </div>        
+        </section>    
+    </main>    
+
+    <!-- Footer -->
+    <footer class="footer-section">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-box">
+          <br>  <h3>🎓 Teach Tech Toe</h3>
+            <p>India's growing learning platform connecting students, trainers, and career opportunities.</p>
+          </div>
+          <div class="footer-box">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="index.html#about">About Us</a></li>
+              <li><a href="Courses.html">Courses</a></li>
+              <li><a href="searchtrainers.html">Search Trainers</a></li>
+              <li><a href="mocktest.html">Mock Tests</a></li>
+            </ul>
+          </div>
+          <div class="footer-box">
+            <h4>Services</h4>
+            <ul>
+              <li><a href="counselling.html">Career Counselling</a></li>
+              <li><a href="trainers.html">Become a Trainer</a></li>
+              <li><a href="students.html">Student Programs</a></li>
+              <li><a href="#">Skill Assessments</a></li>
+            </ul>
+          </div>
+          <div class="footer-box">
+            <h4>Contact Us</h4>
+            <p>📍 A-4 Chitra Estate, Indore, MP</p>
+            <p>📞 +91 8878695818</p>
+            <p>✉️ teachtechtoe@gmail.com</p>
+            <div class="social-links">
+              <a href="#"><i class="fab fa-facebook-f"></i></a>
+              <a href="#"><i class="fab fa-instagram"></i></a>
+              <a href="#"><i class="fab fa-linkedin-in"></i></a>
+              <a href="#"><i class="fab fa-youtube"></i></a>
+              <a href="https://wa.me/7999282337"><i class="fab fa-whatsapp"></i></a>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <div class="footer-bottom">
+          <p>© 2026 Teach Tech Toe. All Rights Reserved.</p>
+          <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms & Conditions</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+    
+    <!-- Mobile Menu & Terminal Simulation Scripts -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const mobileToggle = document.getElementById('mobileToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if(mobileToggle && mobileMenu) {
+          mobileToggle.addEventListener('click', () => mobileMenu.classList.toggle('active'));
+          mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => mobileMenu.classList.remove('active')));
+        }
+
+        // Hero terminal mock script
+        const termBody = document.getElementById('hero-term-body');
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (termBody) {
+          const runs = [
+            { cmd: 'run app.py', out: 'Loop running at index metric: 1..5\n✔ Done in 0.2s' },
+            { cmd: 'run Main.java', out: 'Java Engine Active.\n✔ Compiled via Cloud Engine' },
+            { cmd: 'run main.rs', out: 'Rust Engine Online!\n✔ Compiled & executed' },
+            { cmd: 'run index.html', out: 'Rendering UI Result Canvas...\n✔ Ready in 0.1s' },
+          ];
+          let i = 0;
+          function renderRun(run) {
+            termBody.innerHTML = '<span class="term-prompt">$</span> ' + run.cmd + '<span class="term-cursor"></span>';
+            if (reduceMotion) {
+              termBody.innerHTML = '<span class="term-prompt">$</span> ' + run.cmd + '\n<span class="term-comment">' + run.out + '</span>';
+              return;
+            }
+            setTimeout(() => {
+              termBody.innerHTML = '<span class="term-prompt">$</span> ' + run.cmd + '\n<span class="term-comment">' + run.out + '</span>';
+            }, 700);
+          }
+          renderRun(runs[0]);
+          if (!reduceMotion) {
+            setInterval(() => {
+              i = (i + 1) % runs.length;
+              renderRun(runs[i]);
+            }, 3200);
+          }
+        }
+      });
+    </script>
+
+    <!-- Compiler Engine Logic Scripts (100% client-side, no backend needed - safe for Netlify/static hosting) -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/typescript@5.4.5/lib/typescript.js"></script>
+    <script type="module">
+        // webR (R compiled to WebAssembly) — loaded as a module and exposed on window
+        // so the classic <script> block below can use it. 100% client-side, no backend.
+        import { WebR } from 'https://webr.r-wasm.org/latest/webr.mjs';
+        window.__WebRClass = WebR;
+    </script>
+    <script>
+        // ===============================================================
+        // State
+        // ===============================================================
+        let currentLang = 'html';
+
+        // Languages executed via the free public Judge0 CE API (no key
+        // required, CORS-enabled, works directly from any static host like
+        // Netlify). Note: Piston's public API started requiring a paid/
+        // approved key on Feb 15, 2026 (hence the "HTTP 401" errors), so
+        // this page no longer calls Piston at all.
+        const judge0LangMap = {
+            'c': 50,        // C (GCC 9.2.0)
+            'cpp': 54,      // C++ (GCC 9.2.0)
+            'java': 62,     // Java (OpenJDK 13.0.1)
+            'php': 68,      // PHP (7.4.1)
+            'go': 60,       // Go (1.13.5)
+            'rust': 73,     // Rust (1.40.0)
+            'csharp': 51,   // C# (Mono 6.6.0.161)
+            'ruby': 72      // Ruby (2.7.0)
+        };
+
+        const templates = {
+            'html': `<!DOCTYPE html>\n<html>\n<body style="font-family:sans-serif; text-align:center; padding-top:30px;">\n  <h2 style="color:#ff6b1a;">HTML/CSS/JS Sandbox Ready</h2>\n  <button style="padding:10px 20px; background:#000; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="alert('JS Context Operational!')">Test JavaScript</button>\n</body>\n</html>`,
+            'py-simple': `# Core Python Runtime Engine (runs in your browser via Pyodide)\nfor i in range(1, 6):\n    print(f"Loop running at index metric: {i}")`,
+            'py-ds': `# Data Science Engine (numpy loads automatically in-browser)\nimport numpy as np\n\ndata = np.array([1, 2, 3, 4, 5])\nprint("Data:", data)\nprint("Mean:", np.mean(data))\nprint("Std Dev:", np.std(data))`,
+            'sql': `CREATE TABLE classes (id INT, course TEXT, students INT);\nINSERT INTO classes VALUES (1, 'Fullstack Python', 45);\nSELECT * FROM classes;`,
+            'cpp': `#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "C++ Engine Active!" << endl;\n    for(int i=1; i<=3; i++) {\n        cout << "C++ Iteration: " << i << endl;\n    }\n    return 0;\n}`,
+            'c': `#include <stdio.h>\n\nint main() {\n    printf("Hello from C Engine!\\n");\n    return 0;\n}`,
+            'java': `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Java Core Engine operational.");\n    }\n}`,
+            'php': `<?php\n  echo "PHP Backend Ready.\\n";\n?>`,
+            'go': `package main\nimport "fmt"\nfunc main() {\n    fmt.Println("Go Runtime Active")\n}`,
+            'rust': `fn main() {\n    println!("Rust Engine Compiled Successfully");\n}`,
+            'csharp': `using System;\nclass Program {\n    static void Main() {\n        Console.WriteLine("C# .NET Ready");\n    }\n}`,
+            'js': `console.log("Node.js runtime execution.");\nfor (let i = 1; i <= 3; i++) {\n    console.log("Iteration:", i);\n}`,
+            'ts': `let message: string = "TypeScript compiled successfully.";\nconsole.log(message);`,
+            'ruby': `puts "Ruby Script Executed."`,
+            'r': `# R Engine (runs in your browser via webR)\n# Plots render below, just like RStudio's "Plots" pane\n\ndata <- c(1, 2, 3, 5, 8, 13, 21, 34)\nprint(data)\ncat("Mean:", mean(data), "\n")\ncat("Std Dev:", sd(data), "\n")\n\nplot(data, type = "o", col = "#ff6b1a", lwd = 2, main = "Sample Plot", xlab = "Index", ylab = "Value")`
+        };
+
+        // Initialize editor on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('code-editor').value = templates['html'];
+        });
+
+        // Handle Tab Switching
+        window.switchLanguage = function(event, lang) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            currentLang = lang;
+            document.getElementById('code-editor').value = templates[lang] || "// Start coding here...";
+
+            // UI Adjustments based on language
+            const outputTitle = document.getElementById('output-title');
+            if (lang === 'html') {
+                outputTitle.innerText = "UI Result Canvas";
+                document.getElementById('output-iframe').style.display = 'block';
+                document.getElementById('console-output').style.display = 'none';
+            } else {
+                outputTitle.innerText = "Terminal Output";
+                document.getElementById('output-iframe').style.display = 'none';
+                document.getElementById('console-output').style.display = 'block';
+                document.getElementById('console-output').innerText = "Click 'Run Code' to execute your script.";
+            }
+        };
+
+        // ===============================================================
+        // Execution Engines (all run client-side or via CORS-open public
+        // APIs, so this page works on Netlify/Vercel/GitHub Pages with NO
+        // backend server and NO CORS proxy required).
+        // ===============================================================
+
+        // --- Python & Data Science: Pyodide (Python compiled to WASM) ---
+        let pyodideInstance = null;
+        let pyodideLoadingPromise = null;
+
+        function getPyodideInstance() {
+            if (pyodideInstance) return Promise.resolve(pyodideInstance);
+            if (!pyodideLoadingPromise) {
+                pyodideLoadingPromise = loadPyodide().then((inst) => {
+                    pyodideInstance = inst;
+                    return inst;
+                });
+            }
+            return pyodideLoadingPromise;
+        }
+
+        async function executePython(code) {
+            const statusEl = document.getElementById('status-text');
+            statusEl.innerText = "Loading Python engine (first run only)...";
+            const pyodide = await getPyodideInstance();
+
+            let output = '';
+            pyodide.setStdout({ batched: (s) => { output += s + "\n"; } });
+            pyodide.setStderr({ batched: (s) => { output += s + "\n"; } });
+
+            try {
+                statusEl.innerText = "Checking for imports (numpy/pandas etc)...";
+                await pyodide.loadPackagesFromImports(code);
+            } catch (e) {
+                // Non-fatal: continue even if a package can't be preloaded
+            }
+
+            statusEl.innerText = "Running Python...";
+            try {
+                await pyodide.runPythonAsync(code);
+            } catch (err) {
+                output += "\n" + (err && err.message ? err.message : String(err));
+            }
+
+            return output.trim() || "Execution completed with no output.";
+        }
+
+        // --- SQL: sql.js (SQLite compiled to WASM), already loaded in <head> ---
+        let sqlJsInstance = null;
+
+        async function getSqlJs() {
+            if (!sqlJsInstance) {
+                sqlJsInstance = await initSqlJs({
+                    locateFile: (file) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/${file}`
+                });
+            }
+            return sqlJsInstance;
+        }
+
+        async function executeSQLCode(code) {
+            const SQLlib = await getSqlJs();
+            const db = new SQLlib.Database();
+            try {
+                const results = db.exec(code);
+                if (!results || results.length === 0) {
+                    return "Query executed successfully. No rows returned.";
+                }
+                return results.map((r) => {
+                    const header = r.columns.join(' | ');
+                    const sep = r.columns.map(() => '---').join(' | ');
+                    const rows = r.values.map((row) => row.join(' | ')).join('\n');
+                    return `${header}\n${sep}\n${rows}`;
+                }).join('\n\n');
+            } finally {
+                db.close();
+            }
+        }
+
+        // --- JavaScript: runs natively in the browser (instant, no network) ---
+        function executeJS(code) {
+            const logs = [];
+            const format = (a) => (typeof a === 'object' ? JSON.stringify(a) : String(a));
+            const originalLog = console.log, originalError = console.error, originalWarn = console.warn;
+
+            console.log = (...args) => logs.push(args.map(format).join(' '));
+            console.error = (...args) => logs.push('Error: ' + args.map(format).join(' '));
+            console.warn = (...args) => logs.push('Warning: ' + args.map(format).join(' '));
+
+            try {
+                const result = new Function(code)();
+                if (result !== undefined) logs.push(format(result));
+            } catch (err) {
+                logs.push('Error: ' + err.message);
+            } finally {
+                console.log = originalLog;
+                console.error = originalError;
+                console.warn = originalWarn;
+            }
+
+            return logs.join('\n') || "Execution completed with no output.";
+        }
+
+        // --- TypeScript: transpiled in-browser via the TypeScript compiler, then run as JS ---
+        function executeTS(code) {
+            if (typeof ts === 'undefined') {
+                throw new Error('TypeScript compiler is still loading. Please wait a second and click Run again.');
+            }
+            const jsCode = ts.transpileModule(code, {
+                compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2017 }
+            }).outputText;
+            return executeJS(jsCode);
+        }
+
+        // --- Compiled languages: free public Judge0 CE API (CORS-enabled, no key/proxy needed) ---
+        function toBase64Utf8(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+        function fromBase64Utf8(str) {
+            if (!str) return '';
+            try {
+                return decodeURIComponent(escape(atob(str)));
+            } catch (e) {
+                return str;
+            }
+        }
+
+        async function executeViaJudge0(code, languageId) {
+            const createRes = await fetch('https://ce.judge0.com/submissions?base64_encoded=true&wait=true', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    source_code: toBase64Utf8(code),
+                    language_id: languageId
+                })
+            });
+
+            if (createRes.status === 401 || createRes.status === 403) {
+                throw new Error('The public Judge0 compiler service rejected the request (auth). Please try again in a moment.');
+            }
+            if (!createRes.ok && createRes.status !== 201) {
+                throw new Error(`Judge0 API error (HTTP ${createRes.status}). The public compiler service may be busy — please try again.`);
+            }
+
+            let submission = await createRes.json();
+
+            // If the instance didn't honor wait=true, it only returns a token —
+            // poll for the result instead.
+            if (submission && submission.token && !submission.status) {
+                const token = submission.token;
+                for (let attempt = 0; attempt < 20; attempt++) {
+                    await new Promise((r) => setTimeout(r, 1000));
+                    const pollRes = await fetch(`https://ce.judge0.com/submissions/${token}?base64_encoded=true`);
+                    submission = await pollRes.json();
+                    if (submission.status && submission.status.id > 2) break; // > 2 = done (not queued/processing)
+                }
+            }
+
+            if (!submission || !submission.status) {
+                throw new Error('Judge0 did not return a result in time. Please try again.');
+            }
+
+            const stdout = fromBase64Utf8(submission.stdout);
+            const stderr = fromBase64Utf8(submission.stderr);
+            const compileOutput = fromBase64Utf8(submission.compile_output);
+            const message = fromBase64Utf8(submission.message);
+
+            let out = '';
+            if (compileOutput) out += "Compile Output:\n" + compileOutput + "\n";
+            if (stdout) out += stdout;
+            if (stderr) out += (out ? "\n" : "") + stderr;
+            if (!stdout && !stderr && message) out += message;
+            if (submission.status.description && submission.status.id !== 3) {
+                out += `\n[${submission.status.description}]`;
+            }
+
+            return out.trim() || "Execution completed with no output.";
+        }
+
+        // --- R: webR (R compiled to WebAssembly), loaded as a module above ---
+        let webRInstance = null;
+        let webRLoadingPromise = null;
+
+        function getWebR() {
+            if (webRInstance) return Promise.resolve(webRInstance);
+            if (!webRLoadingPromise) {
+                webRLoadingPromise = (async () => {
+                    if (!window.__WebRClass) {
+                        throw new Error('R engine is still loading. Please wait a moment and click Run again.');
+                    }
+                    const webR = new window.__WebRClass();
+                    await webR.init();
+                    webRInstance = webR;
+                    return webR;
+                })();
+            }
+            return webRLoadingPromise;
+        }
+
+        async function executeR(code) {
+            const statusEl = document.getElementById('status-text');
+            statusEl.innerText = "Loading R engine (first run only)...";
+            const webR = await getWebR();
+
+            statusEl.innerText = "Running R...";
+            const shelter = await new webR.Shelter();
+            try {
+                let result;
+                try {
+                    // Try with graphics capture first (RStudio-style "Plots" pane)
+                    result = await shelter.captureR(code, {
+                        withAutoprint: true,
+                        captureGraphics: { width: 624, height: 400 }
+                    });
+                } catch (graphicsErr) {
+                    // Older/newer webR builds may not support captureGraphics the
+                    // same way — fall back to text-only capture so R still runs.
+                    result = await shelter.captureR(code, { withAutoprint: true });
+                }
+
+                const lines = [];
+                for (const evt of (result.output || [])) {
+                    if (evt.type === 'stdout' || evt.type === 'stderr') {
+                        lines.push(evt.data);
+                    }
+                }
+
+                const images = [];
+                if (result.images && result.images.length) {
+                    for (const bitmap of result.images) {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = bitmap.width;
+                        canvas.height = bitmap.height;
+                        canvas.getContext('2d').drawImage(bitmap, 0, 0);
+                        images.push(canvas.toDataURL('image/png'));
+                    }
+                }
+
+                const text = lines.join('\n').trim() || (images.length ? '' : "Execution completed with no output.");
+                return { text, images };
+            } finally {
+                shelter.purge();
+            }
+        }
+
+        // ===============================================================
+        // Main Execution Router
+        // ===============================================================
+        window.executeCode = async function() {
+            const code = document.getElementById('code-editor').value;
+            const iframe = document.getElementById('output-iframe');
+            const consoleOut = document.getElementById('console-output');
+            const statusEl = document.getElementById('status-text');
+            const plotTitle = document.getElementById('plot-title');
+            const plotContainer = document.getElementById('plot-container');
+
+            // Reset the Plots pane on every run (RStudio-style: only R fills this in)
+            plotContainer.innerHTML = '';
+            plotContainer.style.display = 'none';
+            plotContainer.style.flexDirection = 'column';
+            plotContainer.style.gap = '12px';
+            plotTitle.style.display = 'none';
+
+            if (currentLang === 'html') {
+                iframe.style.display = 'block';
+                consoleOut.style.display = 'none';
+                iframe.srcdoc = code;
+                return;
+            }
+
+            iframe.style.display = 'none';
+            consoleOut.style.display = 'block';
+            consoleOut.innerText = "Running...";
+            statusEl.innerText = "Running...";
+
+            try {
+                let output;
+
+                if (currentLang === 'py-simple' || currentLang === 'py-ds') {
+                    output = await executePython(code);
+                } else if (currentLang === 'sql') {
+                    output = await executeSQLCode(code);
+                } else if (currentLang === 'js') {
+                    output = executeJS(code);
+                } else if (currentLang === 'ts') {
+                    output = executeTS(code);
+                } else if (currentLang === 'r') {
+                    const rResult = await executeR(code);
+                    output = rResult.text;
+                    if (rResult.images && rResult.images.length) {
+                        plotTitle.style.display = 'block';
+                        plotContainer.style.display = 'flex';
+                        rResult.images.forEach((src) => {
+                            const img = document.createElement('img');
+                            img.src = src;
+                            img.style.maxWidth = '100%';
+                            img.style.borderRadius = '8px';
+                            img.style.background = '#fff';
+                            plotContainer.appendChild(img);
+                        });
+                    }
+                } else if (judge0LangMap[currentLang]) {
+                    statusEl.innerText = "Compiling in cloud (Judge0)...";
+                    output = await executeViaJudge0(code, judge0LangMap[currentLang]);
+                } else {
+                    output = `Execution engine for "${currentLang}" is not configured yet.`;
+                }
+
+                consoleOut.innerText = output;
+            } catch (error) {
+                consoleOut.innerText = "Error:\n" + (error && error.message ? error.message : String(error));
+            }
+
+            statusEl.innerText = "Ready";
+        };
+
+        // Utility Buttons
+        window.analyzeWithAI = function() {
+            const consoleOut = document.getElementById('console-output');
+            document.getElementById('output-iframe').style.display = 'none';
+            consoleOut.style.display = 'block';
+            consoleOut.innerText = "🤖 AI Code Review:\n\nLooking good! The syntax matches standard conventions. Keep an eye on memory management in larger loops. (This is a mock AI response).";
+        };
+
+        window.downloadCode = function() {
+            const code = document.getElementById('code-editor').value;
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+
+            const extMap = { 'html': 'html', 'c': 'c', 'cpp': 'cpp', 'java': 'java', 'py-simple': 'py', 'py-ds': 'py', 'js': 'js', 'css': 'css', 'sql': 'sql', 'php': 'php', 'go': 'go', 'rust': 'rs', 'csharp': 'cs', 'ruby': 'rb', 'ts': 'ts', 'r': 'r' };
+            const ext = extMap[currentLang] || 'txt';
+
+            a.download = `teachtechtoe_code.${ext}`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        };
+
+        window.popOutOutput = function() {
+            if (currentLang === 'html') {
+                const code = document.getElementById('code-editor').value;
+                const newWin = window.open();
+                newWin.document.write(code);
+                newWin.document.close();
+            } else {
+                alert("Pop-out view is currently only supported for HTML/CSS/JS canvases.");
+            }
+        };
+
+        window.shareCode = function() {
+            const code = document.getElementById('code-editor').value;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(code).then(() => {
+                    alert("Code copied to clipboard!");
+                }).catch(() => {
+                    alert("Could not copy automatically. Please copy the code manually.");
+                });
+            } else {
+                alert("Clipboard access is not available in this browser.");
+            }
+        };
+    </script>
+
+</body>
+</html>
